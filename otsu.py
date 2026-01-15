@@ -5,11 +5,15 @@ from utils import draw_boxes
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
 
-# controls the size of the blur, to reduce noise
+# controls the size of the blur, to reduce noise [(width, height)]
 BLUR_SIZE = (5, 5)
 
-# controls the size of the cleaning morphology
+# controls the size of the cleaning morphology [(width, height)]
 CLEAN_SIZE = (3, 3)
+
+# controls the minimum and maximum area of detected components [pixels^2]
+MIN_AREA = 5
+MAX_AREA = 500
 
 
 def main():
@@ -55,7 +59,7 @@ def main():
         labels = []
         for i, c in enumerate(contours):
             area = cv2.contourArea(c)
-            if area < 1:
+            if area < MIN_AREA or area > MAX_AREA:
                 continue
 
             x, y, w, h = cv2.boundingRect(c)
