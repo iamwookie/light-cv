@@ -5,15 +5,11 @@ from utils import draw_boxes
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
 
-# controls the sensitivity of detection
-MARGIN = 0.9
+# controls the sensitivity of detection [0-100] (higher = fewer detections)
+PERCENTILE = 95
 
-# controls the minimum area of detected components
+# controls the minimum area of detected components [pixels^2]
 MIN_AREA = 5
-
-# controls the aspect ratio limits
-MIN_ASPECT = 0.6
-MAX_ASPECT = 1.4
 
 
 def main():
@@ -45,7 +41,7 @@ def main():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(gray, (7, 7), 0)
 
-        thresh_val = np.percentile(blur, 95)
+        thresh_val = np.percentile(blur, PERCENTILE)
         _, thresh = cv2.threshold(blur, thresh_val, 255, cv2.THRESH_BINARY)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
