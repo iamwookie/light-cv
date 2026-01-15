@@ -48,3 +48,45 @@ def draw_lines(img, centers, colour=(0, 0, 255), degree=2):
 
         deg[i] += 1
         deg[j] += 1
+
+
+def draw_boxes(
+    img,
+    boxes,
+    *,
+    colour=(255, 255, 255),
+    thickness=1,
+    labels=None,
+    label_colour=(255, 255, 255),
+    font_scale=0.4,
+):
+    for i, (x, y, w, h) in enumerate(boxes):
+        # draw rectangle
+        cv2.rectangle(
+            img,
+            (x, y),
+            (x + w, y + h),
+            colour,
+            thickness,
+            cv2.LINE_AA,
+        )
+
+        if labels is None:
+            continue
+
+        label = labels[i]
+
+        # place label above box if possible, else below
+        tx = x + 2
+        ty = y - 4 if y > 12 else y + h + 12
+
+        cv2.putText(
+            img,
+            label,
+            (tx, ty),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            font_scale,
+            label_colour,
+            thickness,
+            cv2.LINE_AA,
+        )

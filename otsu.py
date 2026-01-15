@@ -1,19 +1,16 @@
 import cv2
 import numpy as np
+
 from utils import draw_boxes
 
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
 
-# controls the sensitivity of detection
-MARGIN = 0.9
+# controls the size of the blur, to reduce noise
+BLUR_SIZE = (5, 5)
 
-# controls the minimum area of detected components
-MIN_AREA = 5
-
-# controls the aspect ratio limits
-MIN_ASPECT = 0.6
-MAX_ASPECT = 1.4
+# controls the size of the cleaning morphology
+CLEAN_SIZE = (3, 3)
 
 
 def main():
@@ -43,29 +40,23 @@ def main():
         # -- processing --
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (7, 7), 0)
-
-        thresh_val = np.percentile(blur, 95)
-        _, thresh = cv2.threshold(blur, thresh_val, 255, cv2.THRESH_BINARY)
+        blur = cv2.GaussianBlur(gray, BLUR_SIZE, 0)
+        _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
 
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # fmt: skip
 
         print("detected contours:", len(contours))
-
-        # -- drawing --
-
-        overlay = frame.copy()
 
         centers = []
         boxes = []
         labels = []
         for i, c in enumerate(contours):
             area = cv2.contourArea(c)
-            if area < MIN_AREA:
+            if area < 1:
                 continue
 
             x, y, w, h = cv2.boundingRect(c)
@@ -75,7 +66,11 @@ def main():
 
             centers.append((cx, cy))
             boxes.append((x, y, w, h))
-            labels.append(f"{i} {area:.1f}")
+            labels.append(f"{i} {area:.2f}")
+
+        # -- drawing --
+
+        overlay = frame.copy()
 
         draw_boxes(
             overlay,

@@ -1,19 +1,14 @@
 import cv2
-import numpy as np
-from utils import draw_boxes
+from utils import draw_stars, draw_lines
 
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
 
 # controls the sensitivity of detection
-MARGIN = 0.9
+MARGIN = 0.7
 
 # controls the minimum area of detected components
 MIN_AREA = 5
-
-# controls the aspect ratio limits
-MIN_ASPECT = 0.6
-MAX_ASPECT = 1.4
 
 
 def main():
@@ -45,12 +40,13 @@ def main():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(gray, (7, 7), 0)
 
-        thresh_val = np.percentile(blur, 95)
+        _, max_val, _, _ = cv2.minMaxLoc(blur)
+        thresh_val = int(max_val * MARGIN)
         _, thresh = cv2.threshold(blur, thresh_val, 255, cv2.THRESH_BINARY)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
 
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # fmt: skip
 
@@ -61,9 +57,7 @@ def main():
         overlay = frame.copy()
 
         centers = []
-        boxes = []
-        labels = []
-        for i, c in enumerate(contours):
+        for c in contours:
             area = cv2.contourArea(c)
             if area < MIN_AREA:
                 continue
@@ -74,17 +68,9 @@ def main():
             cy = y + h // 2
 
             centers.append((cx, cy))
-            boxes.append((x, y, w, h))
-            labels.append(f"{i} {area:.1f}")
 
-        draw_boxes(
-            overlay,
-            boxes,
-            colour=(0, 0, 255),
-            thickness=1,
-            labels=labels,
-            font_scale=0.2,
-        )
+        draw_stars(overlay, centers, colour=(0, 255, 255))
+        draw_lines(overlay, centers, colour=(248, 243, 221), degree=2)
 
         out.write(overlay)
 
