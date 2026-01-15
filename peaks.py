@@ -66,14 +66,14 @@ def main():
 
         n_labels, _, _, centroids = cv2.connectedComponentsWithStats(local_max, 8)
 
-        print("Detected peaks:", n_labels - 1)
+        print("detected peaks:", n_labels - 1)
 
         centers = []
         for i in range(1, n_labels):
             cx, cy = centroids[i]
             centers.append((int(cx), int(cy)))
 
-        # -- drawing peaks --
+        # -- drawing --
 
         overlay = frame.copy()
 
