@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 from utils import draw_boxes
 
