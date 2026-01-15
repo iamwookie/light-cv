@@ -9,13 +9,13 @@ OUTPUT_PATH = "output.avi"
 MARGIN = 0.7
 
 # controls the size of the blur, to reduce noise
-BLUR_SIZE = 5
+BLUR_SIZE = (5, 5)
 
 # controls the size of the cleaning morphology
-CLEAN_SIZE = 3
+CLEAN_SIZE = (3, 3)
 
 # controls the size of the local peak detection
-PEAK_SIZE = 15
+PEAK_SIZE = (15, 15)
 
 # controls the area within which to merge points
 MERGE_AREA = 25
@@ -76,18 +76,18 @@ def main():
         # -- processing --
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (BLUR_SIZE, BLUR_SIZE), 0)
+        blur = cv2.GaussianBlur(gray, BLUR_SIZE, 0)
 
         _, max_val, _, _ = cv2.minMaxLoc(blur)
         thresh = int(max_val * MARGIN)
 
         _, mask = cv2.threshold(blur, thresh, 255, cv2.THRESH_BINARY)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (CLEAN_SIZE, CLEAN_SIZE))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, CLEAN_SIZE)
         clean = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
 
         dist = cv2.distanceTransform(clean, cv2.DIST_L2, 5)
-        peak_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (PEAK_SIZE, PEAK_SIZE)) # fmt: skip
+        peak_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, PEAK_SIZE) # fmt: skip
         dist_dil = cv2.dilate(dist, peak_kernel)
         local_max = ((dist == dist_dil) & (dist > 0)).astype(np.uint8) * 255
 
@@ -105,7 +105,7 @@ def main():
         overlay = frame.copy()
 
         for cx, cy in centers:
-            draw_star(overlay, center=(cx, cy), color=(0, 255, 255))
+            draw_star(overlay, center=(cx, cy), colour=(0, 255, 255))
 
         # -- drawing connections --
 
