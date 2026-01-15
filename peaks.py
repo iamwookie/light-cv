@@ -85,9 +85,11 @@ def main():
         for cx, cy in centers:
             cv2.circle(overlay, (cx, cy), 4, (0, 255, 0), 1)
 
-        for i in range(len(centers)):
-            for j in range(i + 1, len(centers)):
-                cv2.line(overlay, centers[i], centers[j], (0, 255, 0), 1)
+        for i in range(len(centers) - 1):
+            cv2.line(overlay, centers[i], centers[i + 1], (0, 255, 0), 1)
+
+        if len(centers) >= 2:
+            cv2.line(overlay, centers[-1], centers[0], (0, 255, 0), 1)
 
         out.write(overlay)
 
