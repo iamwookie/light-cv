@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
@@ -6,12 +7,17 @@ OUTPUT_PATH = "output.avi"
 # controls the sensitivity of detection
 MARGIN = 0.7
 
-# controls the minimum area of detected components
-MIN_AREA = 50
+# controls the size of the blur, to reduce noise
+BLUR_SIZE = 5
 
-# controls the aspect ratio limits
-MIN_ASPECT = 0.6
-MAX_ASPECT = 1.4
+# controls the size of the cleaning morphology
+CLEAN_SIZE = 3
+
+# controls the size of the local peak detection
+PEAK_SIZE = 15
+
+# controls the area within which to merge points
+MERGE_AREA = 25
 
 
 # utility only
@@ -48,40 +54,35 @@ def main():
         # -- processing --
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (7, 7), 0)
+        blur = cv2.GaussianBlur(gray, (BLUR_SIZE, BLUR_SIZE), 0)
 
         _, max_val, _, _ = cv2.minMaxLoc(blur)
         thresh = int(max_val * MARGIN)
-        print(f"max_val={max_val:.0f}  thresh={thresh}")
 
         _, mask = cv2.threshold(blur, thresh, 255, cv2.THRESH_BINARY)
-        n_labels, _, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (CLEAN_SIZE, CLEAN_SIZE))
+        clean = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+
+        dist = cv2.distanceTransform(clean, cv2.DIST_L2, 5)
+        peak_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (PEAK_SIZE, PEAK_SIZE)) # fmt: skip
+        dist_dil = cv2.dilate(dist, peak_kernel)
+        local_max = ((dist == dist_dil) & (dist > 0)).astype(np.uint8) * 255
+
+        n_labels, _, _, centroids = cv2.connectedComponentsWithStats(local_max, 8)
+
+        print("Detected peaks:", n_labels - 1)
+
+        centers = []
+        for i in range(1, n_labels):
+            cx, cy = centroids[i]
+            centers.append((int(cx), int(cy)))
 
         # -- drawing --
 
         overlay = frame.copy()
-        centers = []
 
-        for i in range(1, n_labels):  # skip background
-            area = stats[i, cv2.CC_STAT_AREA]
-            if area < MIN_AREA:
-                continue
-
-            x = stats[i, cv2.CC_STAT_LEFT]
-            y = stats[i, cv2.CC_STAT_TOP]
-            w = stats[i, cv2.CC_STAT_WIDTH]
-            h = stats[i, cv2.CC_STAT_HEIGHT]
-            if w == 0 or h == 0:
-                continue
-
-            aspect = w / float(h)
-            if aspect < MIN_ASPECT or aspect > MAX_ASPECT:
-                continue
-
-            cx, cy = x + w // 2, y + h // 2
-
-            centers.append((cx, cy))
-
+        for cx, cy in centers:
             cv2.circle(overlay, (cx, cy), 4, (0, 255, 0), 1)
 
         for i in range(len(centers)):
