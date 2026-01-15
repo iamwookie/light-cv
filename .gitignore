@@ -1,4 +1,5 @@
 # Python stuff
+__pycache__/
 .venv/
 
 # I/O files

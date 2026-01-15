@@ -1,4 +1,5 @@
 import cv2
+from utils import draw_stars, draw_lines
 
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
@@ -12,13 +13,6 @@ MIN_AREA = 50
 # controls the aspect ratio limits
 MIN_ASPECT = 0.6
 MAX_ASPECT = 1.4
-
-
-# utility only
-def show_image(image, title="Preview"):
-    cv2.imshow(title, image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 
 def main():
@@ -60,8 +54,8 @@ def main():
         # -- drawing --
 
         overlay = frame.copy()
-        centers = []
 
+        centers = []
         for i in range(1, n_labels):  # skip background
             area = stats[i, cv2.CC_STAT_AREA]
             if area < MIN_AREA:
@@ -82,11 +76,8 @@ def main():
 
             centers.append((cx, cy))
 
-            cv2.circle(overlay, (cx, cy), 4, (0, 255, 0), 1)
-
-        for i in range(len(centers)):
-            for j in range(i + 1, len(centers)):
-                cv2.line(overlay, centers[i], centers[j], (0, 255, 0), 1)
+        draw_stars(overlay, centers, colour=(0, 255, 255))
+        draw_lines(overlay, centers, colour=(248, 243, 221), degree=2)
 
         out.write(overlay)
 
