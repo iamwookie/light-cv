@@ -1,6 +1,6 @@
 import cv2
 
-from utils import draw_boxes
+from utils import draw_stars, draw_lines
 
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
@@ -13,7 +13,7 @@ CLEAN_SIZE = (3, 3)
 
 # controls the minimum and maximum area of detected components [pixels^2]
 MIN_AREA = 5
-MAX_AREA = 500
+MAX_AREA = 1500
 
 
 def main():
@@ -46,7 +46,7 @@ def main():
         blur = cv2.GaussianBlur(gray, BLUR_SIZE, 0)
         _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, CLEAN_SIZE)
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
 
@@ -75,14 +75,18 @@ def main():
 
         overlay = frame.copy()
 
-        draw_boxes(
+        draw_stars(
             overlay,
+            centers,
             boxes,
-            colour=(0, 0, 255),
-            thickness=1,
             labels=labels,
+            colour=(0, 56, 224),
+            size=16,
+            thickness=2,
             font_scale=0.2,
         )
+
+        draw_lines(overlay, centers, colour=(248, 243, 221))
 
         out.write(overlay)
 

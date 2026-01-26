@@ -9,21 +9,55 @@ def show_image(image, title="Preview"):
     cv2.destroyAllWindows()
 
 
-def draw_stars(img, centers, size=6, colour=(0, 255, 255), thickness=1):
-    for cx, cy in centers:
-        # star inner/outer ratio (~0.382)
-        inner = size * 0.382
+def draw_stars(
+    img,
+    centers,
+    boxes,
+    *,
+    size=6,
+    colour=(0, 255, 255),
+    thickness=1,
+    labels=None,
+    label_colour=(255, 255, 255),
+    label_thickness=1,
+    font_scale=0.4,
+):
+    assert len(centers) == len(boxes), "centers and boxes must match"
 
+    for i, ((cx, cy), (x, y, w, h)) in enumerate(zip(centers, boxes)):
+        # ---- draw star ----
+        inner = size * 0.382
         points = []
-        for i in range(10):
-            angle = i * math.pi / 5 - math.pi / 2  # point up
-            r = size if i % 2 == 0 else inner
-            x = int(cx + r * math.cos(angle))
-            y = int(cy + r * math.sin(angle))
-            points.append((x, y))
+
+        for k in range(10):
+            angle = k * math.pi / 5 - math.pi / 2
+            r = size if k % 2 == 0 else inner
+            px = int(cx + r * math.cos(angle))
+            py = int(cy + r * math.sin(angle))
+            points.append((px, py))
 
         pts = np.array(points, np.int32).reshape((-1, 1, 2))
-        cv2.polylines(img, [pts], True, colour, thickness)
+        cv2.polylines(img, [pts], True, colour, thickness, cv2.LINE_AA)
+
+        # ---- draw label (box logic copied from draw_boxes) ----
+        if labels is None:
+            continue
+
+        label = labels[i]
+
+        tx = x + 2
+        ty = y - 4 if y > 12 else y + h + 12
+
+        cv2.putText(
+            img,
+            label,
+            (tx, ty),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            font_scale,
+            label_colour,
+            label_thickness,
+            cv2.LINE_AA,
+        )
 
 
 def draw_lines(img, centers, colour=(0, 0, 255), degree=2):

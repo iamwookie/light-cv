@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from utils import draw_boxes
+from utils import draw_stars
 
 INPUT_PATH = "vid.mp4"
 OUTPUT_PATH = "output.avi"
@@ -9,7 +9,7 @@ OUTPUT_PATH = "output.avi"
 PERCENTILE = 95
 
 # controls the minimum area of detected components [pixels^2]
-MIN_AREA = 5
+MIN_AREA = 2
 
 
 def main():
@@ -73,13 +73,8 @@ def main():
             boxes.append((x, y, w, h))
             labels.append(f"{i} {area:.1f}")
 
-        draw_boxes(
-            overlay,
-            boxes,
-            colour=(0, 0, 255),
-            thickness=1,
-            labels=labels,
-            font_scale=0.2,
+        draw_stars(
+            overlay, centers, boxes, labels=labels, colour=(255, 255, 255), size=12
         )
 
         out.write(overlay)
