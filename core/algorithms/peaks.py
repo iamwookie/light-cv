@@ -75,8 +75,8 @@ def process_frame(frame: MatLike, options: Optional[PeaksOptions] = None):
     if options is None:
         options = PeaksOptions()
 
-    thresh, centers = peaks_thresholding(frame, options.margin, options.blur_size, options.clean_size, options.peak_size) # fmt: skip
+    centers = peaks_thresholding(frame, options.margin, options.blur_size, options.clean_size, options.peak_size) # fmt: skip
 
     metadata = {"n_peaks": len(centers), "boxes": [], "areas": [], "labels": []}
 
-    return thresh, [], centers, metadata
+    return metadata
