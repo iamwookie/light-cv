@@ -2,12 +2,13 @@
 
 ## Code Style
 - Python with type hints; algorithm implementations use `cv2.typing.MatLike` and `dataclass` option objects. See [core/algorithms/otsu.py](core/algorithms/otsu.py) and [core/algorithms/percentile.py](core/algorithms/percentile.py).
-- Each algorithm exposes `process_frame(frame, options)` and returns a metadata dict with `centers`, `boxes`, `areas`, and optional `labels`. See [core/algorithms/fixed.py](core/algorithms/fixed.py), [core/algorithms/peaks.py](core/algorithms/peaks.py).
+- Each algorithm exposes `process_frame(frame, options)` and returns `AlgorithmMetadata` with `centers`, `boxes`, `areas`, and `labels`. See [core/algorithms/__init__.py](core/algorithms/__init__.py).
+- Drawing helpers accept `AlgorithmMetadata` plus an options dataclass. See [core/draw/stars.py](core/draw/stars.py) and [core/draw/boxes.py](core/draw/boxes.py).
 
 ## Architecture
 - Streamlit app drives UI, video upload, per-frame processing, and output download. See [app.py](app.py).
-- Algorithm registry lives in `ALGORITHMS`, mapping names to `AlgorithmConfig` with options + processing function. See [core/algorithms/__init__.py](core/algorithms/__init__.py).
-- Drawing helpers are split into `core/draw` modules and exposed via `DRAWING` using `DrawConfig`. See [core/draw/__init__.py](core/draw/__init__.py).
+- Algorithm registry lives in `ALGORITHMS`, mapping names to `AlgorithmConfig` with options + processing function returning `AlgorithmMetadata`. See [core/algorithms/__init__.py](core/algorithms/__init__.py).
+- Drawing helpers are split into `core/draw` modules and exposed via `DRAWING` using `DrawConfig`, taking `AlgorithmMetadata`. See [core/draw/__init__.py](core/draw/__init__.py).
 
 ## Build and Test
 - No build/test commands are documented in the repo. Dependencies are listed in [pyproject.toml](pyproject.toml).
