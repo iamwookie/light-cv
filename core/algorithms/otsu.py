@@ -84,4 +84,4 @@ def process_frame(frame: MatLike, options: Optional[OtsuOptions] = None):
         "labels": [f"{i} {a:.2f}" for i, a in enumerate(areas)],
     }
 
-    return thresh, contours, centers, metadata
+    return metadata

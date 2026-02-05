@@ -59,19 +59,34 @@ with st.sidebar:
     draw_params = {}
     if stars_enabled:
         st.subheader("Star Settings")
+
         star_colour = st.color_picker("Star Colour", "#FFFF00")
         star_size = st.slider("Star Size", 1, 20, 5)
-        draw_params["stars"] = {"colour": hex_to_bgr(star_colour), "size": star_size}
+
+        draw_params["stars"] = DRAWING["stars"].options(
+            colour=hex_to_bgr(star_colour),
+            size=star_size,
+        )
     if boxes_enabled:
         st.subheader("Box Settings")
+
         box_colour = st.color_picker("Box Colour", "#00FF00")
         box_thickness = st.slider("Box Thickness", 1, 10, 2)
-        draw_params["boxes"] = {"colour": hex_to_bgr(box_colour), "thickness": box_thickness} # fmt: skip
+
+        draw_params["boxes"] = DRAWING["boxes"].options(
+            colour=hex_to_bgr(box_colour),
+            thickness=box_thickness,
+        )
     if lines_enabled:
         st.subheader("Line Settings")
+
         line_colour = st.color_picker("Line Colour", "#FF0000")
         line_thickness = st.slider("Line Thickness", 1, 10, 1)
-        draw_params["lines"] = {"colour": hex_to_bgr(line_colour), "thickness": line_thickness} # fmt: skip
+
+        draw_params["lines"] = DRAWING["lines"].options(
+            colour=hex_to_bgr(line_colour),
+            thickness=line_thickness,
+        )
 
     st.divider()
 
@@ -125,7 +140,7 @@ if uploaded_file is not None:
 
             # -- drawing --
 
-            if stars_enabled and len(metadata["centers"]) > 0:
+            if stars_enabled:
                 DRAWING["stars"].draw(
                     overlay,
                     metadata["centers"],
@@ -134,7 +149,7 @@ if uploaded_file is not None:
                     options=draw_params.get("stars"),
                 )
 
-            if boxes_enabled and len(metadata["boxes"]) > 0:
+            if boxes_enabled:
                 DRAWING["boxes"].draw(
                     overlay,
                     metadata["boxes"],
@@ -142,7 +157,7 @@ if uploaded_file is not None:
                     options=draw_params.get("boxes"),
                 )
 
-            if lines_enabled and len(metadata["centers"]) > 1:
+            if lines_enabled:
                 DRAWING["lines"].draw(
                     overlay,
                     metadata["centers"],
