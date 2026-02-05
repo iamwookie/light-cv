@@ -73,6 +73,9 @@ with st.sidebar:
         line_thickness = st.slider("Line Thickness", 1, 10, 1)
         draw_params["lines"] = {"colour": hex_to_bgr(line_colour), "thickness": line_thickness} # fmt: skip
 
+    st.divider()
+
+    st.text("made for nami (with <3)")
 
 uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
 
