@@ -4,6 +4,8 @@ from typing import Optional
 import cv2
 from cv2.typing import MatLike
 
+from ..algorithms import AlgorithmMetadata
+
 
 @dataclass
 class LinesOptions:
@@ -15,9 +17,8 @@ class LinesOptions:
 
 
 def draw_frame(
-    img: MatLike,
-    centers: list[tuple[int, int]],
-    *,
+    frame: MatLike,
+    metadata: AlgorithmMetadata,
     options: Optional[LinesOptions] = None,
 ) -> None:
     """Draw lines connecting nearest centers."""
@@ -25,7 +26,7 @@ def draw_frame(
     if options is None:
         options = LinesOptions()
 
-    deg = [0] * len(centers)
+    centers = metadata["centers"]
 
     pairs = []
     for i, (xi, yi) in enumerate(centers):
@@ -38,11 +39,18 @@ def draw_frame(
 
     pairs.sort(key=lambda t: t[0])
 
+    deg = [0] * len(centers)
     for _, i, j in pairs:
         if deg[i] >= options.degree or deg[j] >= options.degree:
             continue
 
-        cv2.line(img, centers[i], centers[j], options.colour, options.thickness)
+        cv2.line(
+            frame,
+            centers[i],
+            centers[j],
+            options.colour,
+            options.thickness,
+        )
 
         deg[i] += 1
         deg[j] += 1

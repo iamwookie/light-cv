@@ -88,7 +88,6 @@ def process_frame(frame: MatLike, options: Optional[PeaksOptions] = None):
         "boxes": [],
         "areas": [],
         "labels": [],
-        "n_peaks": len(centers),
     }
 
     return metadata

@@ -4,6 +4,8 @@ from typing import Optional
 import cv2
 from cv2.typing import MatLike
 
+from ..algorithms import AlgorithmMetadata
+
 
 @dataclass
 class BoxesOptions:
@@ -17,20 +19,22 @@ class BoxesOptions:
 
 
 def draw_frame(
-    img: MatLike,
-    boxes: list[tuple[int, int, int, int]],
+    frame: MatLike,
+    metadata: AlgorithmMetadata,
+    options: Optional[BoxesOptions] = None,
     *,
     labels: Optional[list[str]] = None,
-    options: Optional[BoxesOptions] = None,
 ) -> None:
     """Draw bounding boxes with optional labels."""
 
     if options is None:
         options = BoxesOptions()
 
+    boxes = metadata["boxes"]
+
     for i, (x, y, w, h) in enumerate(boxes):
         cv2.rectangle(
-            img,
+            frame,
             (x, y),
             (x + w, y + h),
             options.colour,
@@ -47,7 +51,7 @@ def draw_frame(
         ty = y - 4 if y > 12 else y + h + 12
 
         cv2.putText(
-            img,
+            frame,
             label,
             (tx, ty),
             cv2.FONT_HERSHEY_SIMPLEX,

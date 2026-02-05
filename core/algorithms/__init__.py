@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable, List, Optional, Type, TypedDict
 
 from cv2.typing import MatLike
 
@@ -9,13 +9,20 @@ from .peaks import PeaksOptions, process_frame as peaks_process_frame
 from .fixed import FixedOptions, process_frame as fixed_process_frame
 
 
+class AlgorithmMetadata(TypedDict):
+    centers: list[tuple[int, int]]
+    boxes: list[tuple[int, int, int, int]]
+    areas: list[float]
+    labels: list[str]
+
+
 @dataclass
 class AlgorithmConfig:
     """Configuration for a blob detection algorithm."""
 
     name: str
     options_class: Type[Any]
-    process_frame: Callable[[MatLike, Optional[Any]], Any]
+    process_frame: Callable[[MatLike, Optional[Any]], AlgorithmMetadata]
     params: List[str]
 
     def options(self, **kwargs):
@@ -70,4 +77,4 @@ ALGORITHMS = {
     ),
 }
 
-__all__ = ["AlgorithmConfig", "ALGORITHMS"]
+__all__ = ["AlgorithmMetadata", "AlgorithmConfig", "ALGORITHMS"]

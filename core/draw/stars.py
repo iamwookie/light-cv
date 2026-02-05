@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 from cv2.typing import MatLike
 
+from ..algorithms import AlgorithmMetadata
+
 
 @dataclass
 class StarsOptions:
@@ -20,19 +22,19 @@ class StarsOptions:
 
 
 def draw_frame(
-    img: MatLike,
-    centers: list[tuple[int, int]],
-    boxes: list[tuple[int, int, int, int]],
+    frame: MatLike,
+    metadata: AlgorithmMetadata,
+    options: Optional[StarsOptions] = None,
     *,
     labels: Optional[list[str]] = None,
-    options: Optional[StarsOptions] = None,
 ) -> None:
     """Draw star markers at the provided centers."""
 
     if options is None:
         options = StarsOptions()
 
-    assert len(centers) == len(boxes), "centers and boxes must match"
+    centers = metadata["centers"]
+    boxes = metadata["boxes"]
 
     for i, ((cx, cy), (x, y, w, h)) in enumerate(zip(centers, boxes)):
         inner = options.size * 0.382
@@ -47,7 +49,7 @@ def draw_frame(
 
         pts = np.array(points, np.int32).reshape((-1, 1, 2))
         cv2.polylines(
-            img,
+            frame,
             [pts],
             True,
             options.colour,
@@ -64,7 +66,7 @@ def draw_frame(
         ty = y - 4 if y > 12 else y + h + 12
 
         cv2.putText(
-            img,
+            frame,
             label,
             (tx, ty),
             cv2.FONT_HERSHEY_SIMPLEX,

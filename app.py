@@ -26,11 +26,9 @@ st.title("🔦 Big Brain Blob Tracker")
 
 with st.sidebar:
     st.header("⚙️ Settings")
-
     st.divider()
 
     algo_selected = st.selectbox("Algorithm", list(ALGORITHMS.keys()), help="The blob detection algorithm") # fmt:skip
-
     st.subheader(f"{algo_selected.title()} Settings")
 
     algo = ALGORITHMS[algo_selected]
@@ -59,38 +57,22 @@ with st.sidebar:
     draw_params = {}
     if stars_enabled:
         st.subheader("Star Settings")
-
         star_colour = st.color_picker("Star Colour", "#FFFF00")
         star_size = st.slider("Star Size", 1, 20, 5)
-
-        draw_params["stars"] = DRAWING["stars"].options(
-            colour=hex_to_bgr(star_colour),
-            size=star_size,
-        )
+        draw_params["stars"] = {"colour": hex_to_bgr(star_colour), "size": star_size}
     if boxes_enabled:
         st.subheader("Box Settings")
-
         box_colour = st.color_picker("Box Colour", "#00FF00")
         box_thickness = st.slider("Box Thickness", 1, 10, 2)
-
-        draw_params["boxes"] = DRAWING["boxes"].options(
-            colour=hex_to_bgr(box_colour),
-            thickness=box_thickness,
-        )
+        draw_params["boxes"] = {"colour": hex_to_bgr(box_colour), "thickness": box_thickness} # fmt: skip
     if lines_enabled:
         st.subheader("Line Settings")
-
         line_colour = st.color_picker("Line Colour", "#FF0000")
         line_thickness = st.slider("Line Thickness", 1, 10, 1)
-
-        draw_params["lines"] = DRAWING["lines"].options(
-            colour=hex_to_bgr(line_colour),
-            thickness=line_thickness,
-        )
+        draw_params["lines"] = {"colour": hex_to_bgr(line_colour), "thickness": line_thickness} # fmt: skip
 
     st.divider()
-
-    st.text("made for nami (with <3)")
+    st.text("made for nami (with <3)")  # attribution <3
 
 uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
 
@@ -141,37 +123,29 @@ if uploaded_file is not None:
             # -- drawing --
 
             if stars_enabled:
-                DRAWING["stars"].draw(
-                    overlay,
-                    metadata["centers"],
-                    metadata["boxes"],
-                    labels=metadata.get("labels"),
-                    options=draw_params.get("stars"),
-                )
+                stars = DRAWING["stars"]
+                stars_options = stars.options(**draw_params.get("stars", {}))
+                stars.draw(overlay, metadata, stars_options, labels=metadata.get("labels")) # fmt: skip
 
             if boxes_enabled:
-                DRAWING["boxes"].draw(
-                    overlay,
-                    metadata["boxes"],
-                    labels=metadata.get("labels"),
-                    options=draw_params.get("boxes"),
-                )
+                boxes = DRAWING["boxes"]
+                boxes_options = boxes.options(**draw_params.get("boxes", {}))
+                boxes.draw(overlay, metadata, boxes_options, labels=metadata.get("labels")) # fmt: skip
 
             if lines_enabled:
-                DRAWING["lines"].draw(
-                    overlay,
-                    metadata["centers"],
-                    options=draw_params.get("lines"),
-                )
+                lines = DRAWING["lines"]
+                lines_options = lines.options(**draw_params.get("lines", {}))
+                lines.draw(overlay, metadata, lines_options)
 
-            progress.progress((i + 1) / n_frames)
+            progress.progress((i + 1) / n_frames, f"Cooking frame {i + 1} / {n_frames}")
 
             out.write(overlay)
 
         cap.release()
         out.release()
 
-        progress.progress(1.0)
+        progress.progress(1.0, "Cooking complete!")
+        st.balloons()  # celebratations
 
         with open(output_path, "rb") as output_file:
             st.download_button(

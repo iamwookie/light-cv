@@ -1,5 +1,8 @@
 from dataclasses import dataclass
-from typing import Any, Callable, List, Type
+from typing import Any, Callable, List, Type, Optional
+
+from cv2.typing import MatLike
+from ..algorithms import AlgorithmMetadata
 
 from .boxes import BoxesOptions, draw_frame as draw_boxes
 from .lines import LinesOptions, draw_frame as draw_lines
@@ -12,7 +15,7 @@ class DrawConfig:
 
     name: str
     options_class: Type[Any]
-    draw: Callable[..., None]
+    draw: Callable[[MatLike, AlgorithmMetadata, Optional[Any]], None]
     params: List[str]
 
     def options(self, **kwargs):
