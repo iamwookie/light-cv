@@ -58,12 +58,12 @@ with st.sidebar:
     if stars_enabled:
         st.subheader("Star Settings")
         star_colour = st.color_picker("Star Colour", "#FFFF00")
-        star_size = st.slider("Star Size", 1, 20, 5)
+        star_size = st.slider("Star Size", 1, 20, 10)
         draw_params["stars"] = {"colour": hex_to_bgr(star_colour), "size": star_size}
     if boxes_enabled:
         st.subheader("Box Settings")
         box_colour = st.color_picker("Box Colour", "#00FF00")
-        box_thickness = st.slider("Box Thickness", 1, 10, 2)
+        box_thickness = st.slider("Box Thickness", 1, 10, 1)
         draw_params["boxes"] = {"colour": hex_to_bgr(box_colour), "thickness": box_thickness} # fmt: skip
     if lines_enabled:
         st.subheader("Line Settings")
@@ -90,9 +90,8 @@ if uploaded_file is not None:
 
     st.success("File uploaded successfully!")
 
-    if st.button("LETS COOK! 🍳"):
-        progress = st.progress(0.0)
-
+    progress = st.progress(0.0, "Ready to cook!")
+    if st.button("LETS COOK 🍳"):
         cap = cv2.VideoCapture(input_path)
         if not cap.isOpened():
             st.error("Error: Could not open video.")
@@ -147,9 +146,10 @@ if uploaded_file is not None:
         progress.progress(1.0, "Cooking complete!")
         st.balloons()  # celebratations
 
+        st.divider()
         with open(output_path, "rb") as output_file:
             st.download_button(
-                label="Download Processed Video",
+                label="DOWNLOAD COOKED VIDEO ⬇️",
                 data=output_file,
                 file_name="output.avi",
                 mime="video/x-msvideo",
