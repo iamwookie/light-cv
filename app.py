@@ -103,7 +103,7 @@ if uploaded_file is not None:
         w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        fourcc = cv2.VideoWriter.fourcc(*"XVID")
+        fourcc = cv2.VideoWriter.fourcc(*"MJPG")
         out = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
 
         n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
