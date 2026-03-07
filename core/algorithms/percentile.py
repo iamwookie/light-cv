@@ -13,7 +13,7 @@ class PercentileOptions:
     percentile: int = 96  # Detection sensitivity [0-100] (higher = fewer detections)
     blur_size: int = 5  # Size of Gaussian blur kernel (odd number)
     clean_size: int = 3  # Size of morphology kernel for cleaning
-    min_area: int = 2  # Minimum contour area in pixels^2
+    min_area: int = 4  # Minimum contour area in pixels^2
     max_area: int = 86400  # Maximum contour area in pixels^2
 
 
