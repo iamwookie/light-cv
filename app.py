@@ -36,13 +36,13 @@ with st.sidebar:
     if "percentile" in algo.params:
         algo_params["percentile"] = st.number_input("Percentile", 0.0, 100.0, 96.0, help="Higher = fewer detections") # fmt:skip
     if "blur_size" in algo.params:
-        algo_params["blur_size"] = st.slider("Blur Size", 1, 15, 5, step=2)
+        algo_params["blur_size"] = st.slider("Blur Size", 1, 15, 5, step=2, help="Leave this to the default if you don't know what it does") # fmt:skip
     if "clean_size" in algo.params:
-        algo_params["clean_size"] = st.slider("Clean Size", 1, 11, 3, step=2)
+        algo_params["clean_size"] = st.slider("Clean Size", 1, 11, 3, step=2, help="Leave this to the default if you don't know what it does") # fmt:skip
     if "min_area" in algo.params:
-        algo_params["min_area"] = st.number_input("Min Area", 1, 1000, 2) # fmt:skip
+        algo_params["min_area"] = st.number_input("Min Area", 1, 86400, 4, help="Higher = fewer small blobs") # fmt:skip
     if "max_area" in algo.params:
-        algo_params["max_area"] = st.number_input("Max Area", 100, 1000000, 86400)
+        algo_params["max_area"] = st.number_input("Max Area", 100, 1000000, 86400, help="Lower = fewer large blobs") # fmt:skip
     if "margin" in algo.params:
         algo_params["margin"] = st.slider("Margin", 0.0, 1.0, 0.2, help="Intensity threshold as fraction of max") # fmt:skip
 
