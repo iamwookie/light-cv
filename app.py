@@ -74,27 +74,41 @@ with st.sidebar:
     st.divider()
     st.text("made for nami (with <3)")  # attribution <3
 
+def remove_temp(key: str) -> None:
+    path = st.session_state.pop(key, None)
+    if path:
+        Path(path).unlink(missing_ok=True)
+
+
 uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
 
+# streamlit reruns this script on every interaction, so temp files live in
+# session state and are only replaced when the upload changes
+if uploaded_file is None or st.session_state.get("file_id") != uploaded_file.file_id:
+    remove_temp("input_path")
+    remove_temp("output_path")
+    st.session_state.pop("file_id", None)
+
 if uploaded_file is not None:
-    # Save the uploaded file to a temporary location
+    if "input_path" not in st.session_state:
+        suffix = Path(uploaded_file.name).suffix
+        with tf.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+            temp_file.write(uploaded_file.getbuffer())
+        st.session_state.input_path = temp_file.name
+        st.session_state.file_id = uploaded_file.file_id
 
-    suffix = Path(uploaded_file.name).suffix
-
-    with tf.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
-        temp_file.write(uploaded_file.read())
-        input_path = temp_file.name
-
-    with tf.NamedTemporaryFile(delete=False, suffix=".avi") as output_file:
-        output_path = output_file.name
+    input_path = st.session_state.input_path
 
     st.success("File uploaded successfully!")
 
     progress = st.progress(0.0, "Ready to cook!")
     if st.button("LETS COOK 🍳"):
+        remove_temp("output_path")
+
         cap = cv2.VideoCapture(input_path)
         if not cap.isOpened():
             st.error("Error: Could not open video.")
+            st.stop()
 
         fps = cap.get(cv2.CAP_PROP_FPS)
         if not fps or fps <= 0:
@@ -103,8 +117,16 @@ if uploaded_file is not None:
         w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+        with tf.NamedTemporaryFile(delete=False, suffix=".avi") as output_file:
+            output_path = output_file.name
+
         fourcc = cv2.VideoWriter.fourcc(*"MJPG")
         out = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
+        if not out.isOpened():
+            cap.release()
+            Path(output_path).unlink(missing_ok=True)
+            st.error("Error: Could not create output video.")
+            st.stop()
 
         n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         for i in range(n_frames):
@@ -143,14 +165,18 @@ if uploaded_file is not None:
         cap.release()
         out.release()
 
+        st.session_state.output_path = output_path
+
         progress.progress(1.0, "Cooking complete!")
         st.balloons()  # celebratations
 
+    if "output_path" in st.session_state:
         st.divider()
-        with open(output_path, "rb") as output_file:
+        with open(st.session_state.output_path, "rb") as output_file:
             st.download_button(
                 label="DOWNLOAD COOKED VIDEO ⬇️",
                 data=output_file,
                 file_name="output.avi",
                 mime="video/x-msvideo",
+                on_click="ignore",
             )
